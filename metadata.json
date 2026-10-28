@@ -1,0 +1,6 @@
+{
+  "name": "ApexLife - Habit, Fitness, Deep Work & Creator Suite",
+  "description": "Comprehensive all-in-one productivity suite featuring habit streak tracking, fitness & biometric BMI logs, financial cashflow & recurring subscriptions, deep work study timer with anime motivational voice alarms, posture & productivity monitor, reel editing studio, and AI personalized study & workout planners.",
+  "requestFramePermissions": ["camera"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
