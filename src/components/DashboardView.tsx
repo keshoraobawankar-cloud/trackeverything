@@ -17,7 +17,13 @@ import {
   BarChart3,
   Award,
   Layers,
-  Gauge
+  Gauge,
+  Search,
+  Compass,
+  Shield,
+  Bell,
+  Download,
+  PlusCircle
 } from 'lucide-react';
 import {
   ResponsiveContainer,
@@ -56,6 +62,7 @@ interface DashboardViewProps {
   postureStats: PostureSessionStats;
   onNavigate: (tab: string) => void;
   onStartDeepWork: () => void;
+  onOpenCommandPalette?: () => void;
 }
 
 // Custom tooltip for Recharts habit trend line
@@ -177,7 +184,8 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
   reelPosts,
   postureStats,
   onNavigate,
-  onStartDeepWork
+  onStartDeepWork,
+  onOpenCommandPalette
 }) => {
   const todayStr = new Date().toISOString().split('T')[0];
   const [chartMetric, setChartMetric] = useState<'count' | 'rate'>('count');
@@ -435,6 +443,17 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
               <Activity className="w-4 h-4 text-emerald-400" />
               <span>Log Biometrics</span>
             </button>
+            {onOpenCommandPalette && (
+              <button
+                onClick={onOpenCommandPalette}
+                className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-cyan-950/40 hover:bg-cyan-900/60 text-cyan-300 font-medium text-sm border border-cyan-500/30 hover:border-cyan-400/60 transition-all shadow-sm group"
+                title="Search and jump directly to any feature (Cmd+K / Ctrl+K)"
+              >
+                <Search className="w-4 h-4 text-cyan-400 group-hover:scale-110 transition-transform" />
+                <span>Feature Navigator</span>
+                <kbd className="px-1.5 py-0.5 rounded text-[10px] font-mono bg-zinc-900/80 text-cyan-200 border border-cyan-700/50">⌘K</kbd>
+              </button>
+            )}
           </div>
         </div>
       </div>
@@ -543,6 +562,156 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
           <div className="mt-2 flex items-center justify-between text-[11px] text-zinc-400">
             <span>{scheduledCount} queued for release</span>
             <span className="group-hover:text-zinc-200 flex items-center gap-0.5">Open Studio <ArrowRight className="w-3 h-3" /></span>
+          </div>
+        </div>
+      </div>
+
+      {/* Quick Capability & Feature Directory */}
+      <div className="rounded-2xl bg-zinc-900/90 border border-zinc-800/80 p-5 lg:p-6 shadow-xl relative overflow-hidden">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-zinc-800/80">
+          <div>
+            <div className="flex items-center gap-2">
+              <div className="p-2 rounded-lg bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">
+                <Compass className="w-4 h-4" />
+              </div>
+              <h2 className="text-base sm:text-lg font-bold text-white tracking-tight flex items-center gap-2">
+                Quick Feature & Capabilities Directory
+              </h2>
+              <span className="text-[10px] uppercase font-mono px-2 py-0.5 rounded bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 font-semibold">
+                Direct Jump
+              </span>
+            </div>
+            <p className="text-xs text-zinc-400 mt-1">
+              Find and navigate directly to any tool, AI assistant, tracker, or calculator in ApexLife
+            </p>
+          </div>
+
+          {onOpenCommandPalette && (
+            <button
+              onClick={onOpenCommandPalette}
+              className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-zinc-950 hover:bg-zinc-800 text-zinc-300 hover:text-white border border-zinc-700/80 hover:border-cyan-500/50 text-xs font-medium transition-all group shrink-0"
+            >
+              <Search className="w-3.5 h-3.5 text-zinc-400 group-hover:text-cyan-400" />
+              <span>Search All Features</span>
+              <kbd className="px-1.5 py-0.5 rounded text-[10px] font-mono bg-zinc-800 text-zinc-400 border border-zinc-700">⌘K</kbd>
+            </button>
+          )}
+        </div>
+
+        <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+          {/* Group 1: Habits & Discipline */}
+          <div className="p-3.5 rounded-xl bg-zinc-950/70 border border-zinc-800/70 flex flex-col justify-between space-y-2.5">
+            <div>
+              <div className="flex items-center gap-2 text-xs font-semibold text-orange-400">
+                <Flame className="w-3.5 h-3.5" />
+                <span>Habits & Consistency</span>
+              </div>
+              <p className="text-[11px] text-zinc-400 mt-1">Multi-day streaks, category breakdowns & velocity charts</p>
+            </div>
+            <div className="space-y-1.5 pt-1">
+              <button
+                onClick={() => onNavigate('habits')}
+                className="w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg bg-zinc-900/80 hover:bg-zinc-800 border border-zinc-800/80 hover:border-orange-500/40 text-xs text-zinc-200 transition-colors text-left"
+              >
+                <span>Log Today's Habits</span>
+                <ArrowRight className="w-3 h-3 text-zinc-500" />
+              </button>
+              <button
+                onClick={() => onNavigate('habits')}
+                className="w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg bg-zinc-900/80 hover:bg-zinc-800 border border-zinc-800/80 hover:border-orange-500/40 text-xs text-zinc-200 transition-colors text-left"
+              >
+                <span>7-Day Heatmap & Streaks</span>
+                <ArrowRight className="w-3 h-3 text-zinc-500" />
+              </button>
+            </div>
+          </div>
+
+          {/* Group 2: Fitness & Biometrics */}
+          <div className="p-3.5 rounded-xl bg-zinc-950/70 border border-zinc-800/70 flex flex-col justify-between space-y-2.5">
+            <div>
+              <div className="flex items-center gap-2 text-xs font-semibold text-emerald-400">
+                <Activity className="w-3.5 h-3.5" />
+                <span>Fitness & Biometrics</span>
+              </div>
+              <p className="text-[11px] text-zinc-400 mt-1">Workout logs, BMI calculator & calorie burn telemetry</p>
+            </div>
+            <div className="space-y-1.5 pt-1">
+              <button
+                onClick={() => onNavigate('fitness')}
+                className="w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg bg-zinc-900/80 hover:bg-zinc-800 border border-zinc-800/80 hover:border-emerald-500/40 text-xs text-zinc-200 transition-colors text-left"
+              >
+                <span>Record Workout Log</span>
+                <ArrowRight className="w-3 h-3 text-zinc-500" />
+              </button>
+              <button
+                onClick={() => onNavigate('fitness')}
+                className="w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg bg-zinc-900/80 hover:bg-zinc-800 border border-zinc-800/80 hover:border-emerald-500/40 text-xs text-zinc-200 transition-colors text-left"
+              >
+                <span>BMI & Weight Target</span>
+                <ArrowRight className="w-3 h-3 text-zinc-500" />
+              </button>
+            </div>
+          </div>
+
+          {/* Group 3: Finances & Subscriptions */}
+          <div className="p-3.5 rounded-xl bg-zinc-950/70 border border-zinc-800/70 flex flex-col justify-between space-y-2.5">
+            <div>
+              <div className="flex items-center gap-2 text-xs font-semibold text-cyan-400">
+                <DollarSign className="w-3.5 h-3.5" />
+                <span>Finances & Recurring</span>
+              </div>
+              <p className="text-[11px] text-zinc-400 mt-1">Pie charts, budget caps, CSV export, quick add & 3-day alerts</p>
+            </div>
+            <div className="space-y-1.5 pt-1">
+              <button
+                onClick={() => onNavigate('finance')}
+                className="w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg bg-zinc-900/80 hover:bg-zinc-800 border border-zinc-800/80 hover:border-cyan-500/40 text-xs text-zinc-200 transition-colors text-left"
+              >
+                <span>Category Pie Chart & Budget</span>
+                <ArrowRight className="w-3 h-3 text-zinc-500" />
+              </button>
+              <button
+                onClick={() => onNavigate('finance')}
+                className="w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg bg-zinc-900/80 hover:bg-zinc-800 border border-zinc-800/80 hover:border-cyan-500/40 text-xs text-zinc-200 transition-colors text-left"
+              >
+                <span>Upcoming Recurring Bills (3-Day)</span>
+                <ArrowRight className="w-3 h-3 text-zinc-500" />
+              </button>
+            </div>
+          </div>
+
+          {/* Group 4: Deep Work, Posture & Reels */}
+          <div className="p-3.5 rounded-xl bg-zinc-950/70 border border-zinc-800/70 flex flex-col justify-between space-y-2.5">
+            <div>
+              <div className="flex items-center gap-2 text-xs font-semibold text-violet-400">
+                <Clock className="w-3.5 h-3.5" />
+                <span>Deep Work & Creator</span>
+              </div>
+              <p className="text-[11px] text-zinc-400 mt-1">Anime voice alarms, AI posture vision & 9:16 reel studio</p>
+            </div>
+            <div className="space-y-1.5 pt-1">
+              <button
+                onClick={() => onNavigate('study')}
+                className="w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg bg-zinc-900/80 hover:bg-zinc-800 border border-zinc-800/80 hover:border-violet-500/40 text-xs text-zinc-200 transition-colors text-left"
+              >
+                <span>Pomodoro / Anime Voice Timer</span>
+                <ArrowRight className="w-3 h-3 text-zinc-500" />
+              </button>
+              <button
+                onClick={() => onNavigate('posture')}
+                className="w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg bg-zinc-900/80 hover:bg-zinc-800 border border-zinc-800/80 hover:border-violet-500/40 text-xs text-zinc-200 transition-colors text-left"
+              >
+                <span>AI Posture & Camera Vision</span>
+                <ArrowRight className="w-3 h-3 text-zinc-500" />
+              </button>
+              <button
+                onClick={() => onNavigate('reels')}
+                className="w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg bg-zinc-900/80 hover:bg-zinc-800 border border-zinc-800/80 hover:border-violet-500/40 text-xs text-zinc-200 transition-colors text-left"
+              >
+                <span>Reel Studio & Viral Hooks</span>
+                <ArrowRight className="w-3 h-3 text-zinc-500" />
+              </button>
+            </div>
           </div>
         </div>
       </div>

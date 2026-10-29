@@ -13,6 +13,7 @@ import { StudyTimerView } from './components/StudyTimerView';
 import { PostureMonitorView } from './components/PostureMonitorView';
 import { ReelStudioView } from './components/ReelStudioView';
 import { SecurityAndSettingsModal } from './components/SecurityAndSettingsModal';
+import { CommandPaletteModal } from './components/CommandPaletteModal';
 import { Storage } from './services/storage';
 import {
   Habit,
@@ -32,8 +33,34 @@ export default function App() {
   // Navigation & UI State
   const [activeTab, setActiveTab] = useState<string>('dashboard');
   const [showSettingsModal, setShowSettingsModal] = useState<boolean>(false);
+  const [showCommandPalette, setShowCommandPalette] = useState<boolean>(false);
   const [isLocked, setIsLocked] = useState<boolean>(false);
   const [theme, setTheme] = useState<ThemeMode>('obsidian');
+
+  // Global keyboard shortcut for Command Palette / Feature Finder (Cmd+K / Ctrl+K / /)
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        setShowCommandPalette((prev) => !prev);
+        return;
+      }
+      const target = e.target as HTMLElement | null;
+      const isInput =
+        target &&
+        (target.tagName === 'INPUT' ||
+          target.tagName === 'TEXTAREA' ||
+          target.tagName === 'SELECT' ||
+          target.isContentEditable);
+      if (e.key === '/' && !isInput && !e.metaKey && !e.ctrlKey) {
+        e.preventDefault();
+        setShowCommandPalette(true);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
 
   // Application Data States
   const [habits, setHabits] = useState<Habit[]>(() => Storage.getHabits());
@@ -296,6 +323,7 @@ export default function App() {
         onOpenSettings={() => setShowSettingsModal(true)}
         isLocked={isLocked}
         onLockApp={() => setIsLocked(true)}
+        onOpenCommandPalette={() => setShowCommandPalette(true)}
       />
 
       {/* Main Body View Content */}
@@ -313,6 +341,7 @@ export default function App() {
             postureStats={postureStats}
             onNavigate={(tab) => setActiveTab(tab)}
             onStartDeepWork={() => setActiveTab('study')}
+            onOpenCommandPalette={() => setShowCommandPalette(true)}
           />
         )}
 
@@ -400,6 +429,25 @@ export default function App() {
         onSelectTheme={handleSelectTheme}
         isLocked={isLocked}
         onToggleLock={() => setIsLocked(!isLocked)}
+      />
+
+      {/* Instant Command Palette & Global Feature Navigator (Cmd+K / Ctrl+K / /) */}
+      <CommandPaletteModal
+        isOpen={showCommandPalette}
+        onClose={() => setShowCommandPalette(false)}
+        onNavigate={(tab) => {
+          setActiveTab(tab);
+          setShowCommandPalette(false);
+        }}
+        onOpenSettings={() => {
+          setShowCommandPalette(false);
+          setShowSettingsModal(true);
+        }}
+        onLockApp={() => {
+          setShowCommandPalette(false);
+          setIsLocked(true);
+        }}
+        theme={theme}
       />
     </div>
   );

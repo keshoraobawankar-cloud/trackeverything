@@ -394,8 +394,14 @@ async function startServer() {
     });
   }
 
-  // Check if port 3000 is occupied using findAvailablePort from server-utils and increment to 3001 or next available
-  const preferredPort = parseInt(process.env.PORT || '3000', 10);
+  // Parse port from CLI args (--port 3000) or env variable, defaulting to 3000
+  let preferredPort = 3000;
+  const portArgIndex = process.argv.indexOf('--port');
+  if (portArgIndex !== -1 && process.argv[portArgIndex + 1]) {
+    preferredPort = parseInt(process.argv[portArgIndex + 1], 10);
+  } else if (process.env.PORT) {
+    preferredPort = parseInt(process.env.PORT, 10);
+  }
   const activePort = await findAvailablePort(preferredPort);
 
   const startListening = (portToTry: number) => {

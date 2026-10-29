@@ -1,4 +1,3 @@
-import React from 'react';
 import {
   Flame,
   Activity,
@@ -10,7 +9,8 @@ import {
   LayoutDashboard,
   Palette,
   CloudCheck,
-  Lock
+  Lock,
+  Search
 } from 'lucide-react';
 import { ThemeMode } from '../types';
 
@@ -22,6 +22,7 @@ interface NavigationProps {
   onOpenSettings: () => void;
   isLocked: boolean;
   onLockApp: () => void;
+  onOpenCommandPalette: () => void;
 }
 
 export const Navigation: React.FC<NavigationProps> = ({
@@ -30,7 +31,8 @@ export const Navigation: React.FC<NavigationProps> = ({
   streakCount,
   onOpenSettings,
   isLocked,
-  onLockApp
+  onLockApp,
+  onOpenCommandPalette
 }) => {
   const tabs = [
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
@@ -91,6 +93,17 @@ export const Navigation: React.FC<NavigationProps> = ({
 
           {/* Right Status Cues & Action Badges */}
           <div className="flex items-center gap-2 sm:gap-3">
+            {/* Quick Command & Feature Finder */}
+            <button
+              onClick={onOpenCommandPalette}
+              title="Search & Feature Finder (Cmd+K / Ctrl+K / /)"
+              className="flex items-center gap-2 px-2.5 sm:px-3 py-1.5 rounded-xl bg-zinc-900/90 hover:bg-zinc-800 text-zinc-300 hover:text-white border border-zinc-800 hover:border-cyan-500/40 text-xs font-medium transition-all shadow-sm group"
+            >
+              <Search className="w-3.5 h-3.5 text-zinc-400 group-hover:text-cyan-400 transition-colors" />
+              <span className="hidden md:inline text-zinc-300 font-sans">Find feature...</span>
+              <kbd className="hidden sm:inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-mono bg-zinc-800 text-zinc-400 border border-zinc-700/80">⌘K</kbd>
+            </button>
+
             {/* Global Streak Cue */}
             <button
               onClick={() => setActiveTab('habits')}

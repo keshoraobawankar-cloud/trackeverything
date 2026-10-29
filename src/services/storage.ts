@@ -25,7 +25,8 @@ const STORAGE_KEYS = {
   REEL_POSTS: 'apexlife_reel_posts',
   THEME: 'apexlife_theme',
   SECURITY: 'apexlife_security_settings',
-  LEADERBOARD: 'apexlife_leaderboard'
+  LEADERBOARD: 'apexlife_leaderboard',
+  MONTHLY_BUDGET_CAP: 'apexlife_monthly_budget_cap'
 };
 
 const getTodayDateStr = () => new Date().toISOString().split('T')[0];
@@ -625,6 +626,22 @@ export const Storage = {
   saveSubscriptions(subs: Subscription[]) {
     try {
       localStorage.setItem(STORAGE_KEYS.SUBSCRIPTIONS, JSON.stringify(subs));
+    } catch (e) {
+      console.warn('Storage save error:', e);
+    }
+  },
+
+  getMonthlyBudgetCap(): number {
+    try {
+      const data = localStorage.getItem(STORAGE_KEYS.MONTHLY_BUDGET_CAP);
+      return data ? Number(data) : 3200;
+    } catch {
+      return 3200;
+    }
+  },
+  saveMonthlyBudgetCap(cap: number) {
+    try {
+      localStorage.setItem(STORAGE_KEYS.MONTHLY_BUDGET_CAP, String(cap));
     } catch (e) {
       console.warn('Storage save error:', e);
     }
