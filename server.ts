@@ -3,6 +3,7 @@ import { createServer as createViteServer } from 'vite';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import dotenv from 'dotenv';
+import { findAvailablePort } from './src/server-utils';
 import { GoogleGenAI } from '@google/genai';
 
 dotenv.config();
@@ -11,7 +12,6 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const app = express();
-const port = parseInt(process.env.PORT || '3000', 10);
 
 app.use(express.json());
 
@@ -380,7 +380,10 @@ async function startServer() {
 
   if (!isProduction) {
     const vite = await createViteServer({
-      server: { middlewareMode: true },
+      server: {
+        middlewareMode: true,
+        hmr: process.env.DISABLE_HMR === 'true' ? false : undefined,
+      },
       appType: 'spa',
     });
     app.use(vite.middlewares);
@@ -391,9 +394,44 @@ async function startServer() {
     });
   }
 
-  app.listen(port, '0.0.0.0', () => {
-    console.log(`ApexLife Server running on http://0.0.0.0:${port}`);
-  });
+  // Check if port 3000 is occupied using findAvailablePort from server-utils and increment to 3001 or next available
+  const preferredPort = parseInt(process.env.PORT || '3000', 10);
+  const activePort = await findAvailablePort(preferredPort);
+
+  const startListening = (portToTry: number) => {
+    const serverInstance = app.listen(portToTry, '0.0.0.0', () => {
+      console.log(`ApexLife Server running on http://0.0.0.0:${portToTry}`);
+    });
+
+    serverInstance.on('error', async (err: any) => {
+      if (err.code === 'EADDRINUSE') {
+        const nextPort = await findAvailablePort(portToTry + 1);
+        console.warn(`[ApexLife] Port ${portToTry} encountered EADDRINUSE during startup. Incrementing to alternative port ${nextPort}...`);
+        try {
+          serverInstance.close();
+        } catch {}
+        startListening(nextPort);
+      } else {
+        console.error('Server listen error:', err);
+      }
+    });
+
+    const cleanup = () => {
+      try {
+        serverInstance.close(() => {
+          process.exit(0);
+        });
+      } catch {
+        process.exit(0);
+      }
+    };
+    process.on('SIGTERM', cleanup);
+    process.on('SIGINT', cleanup);
+
+    return serverInstance;
+  };
+
+  startListening(activePort);
 }
 
 startServer().catch((err) => {

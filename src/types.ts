@@ -40,6 +40,12 @@ export interface BmiRecord {
   notes: string;
 }
 
+export interface WorkoutGoal {
+  id: string;
+  category: 'Strength' | 'Cardio' | 'HIIT' | 'Mobility' | 'Calisthenics' | string;
+  targetMinutes: number; // Weekly target duration in minutes
+}
+
 export interface FitnessProfile {
   weightKg: number;
   heightCm: number;
@@ -54,6 +60,7 @@ export interface FitnessProfile {
   todayCaloriesBurned: number;
   todayActiveHeartRate: number;
   aiProtocol?: any;
+  workoutGoals?: WorkoutGoal[];
 }
 
 export interface Transaction {

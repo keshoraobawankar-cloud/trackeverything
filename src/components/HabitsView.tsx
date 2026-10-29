@@ -11,7 +11,9 @@ import {
   Sparkles,
   Download,
   FileSpreadsheet,
-  Filter
+  Filter,
+  Search,
+  X
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { Habit, HabitCategory } from '../types';
@@ -37,6 +39,7 @@ export const HabitsView: React.FC<HabitsViewProps> = ({
   const [newHabitReminder, setNewHabitReminder] = useState('08:00');
   const [newHabitColor, setNewHabitColor] = useState('#818cf8');
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
+  const [searchQuery, setSearchQuery] = useState<string>('');
 
   // Generate last 7 days list for quick tracker table
   const days: { dateStr: string; label: string; dayNum: number; isToday: boolean }[] = [];
@@ -100,9 +103,22 @@ export const HabitsView: React.FC<HabitsViewProps> = ({
   const allCategories = Array.from(new Set([...defaultCategories, ...habitCategories]));
   const filterCategories = ['All', ...allCategories];
 
-  const filteredHabits = selectedCategory === 'All'
-    ? habits
-    : habits.filter(h => (h.category || '').toLowerCase() === selectedCategory.toLowerCase());
+  const filteredHabits = habits.filter((h) => {
+    const matchesCategory =
+      selectedCategory === 'All' ||
+      (h.category || '').toLowerCase() === selectedCategory.toLowerCase();
+
+    const query = searchQuery.trim().toLowerCase();
+    if (!query) return matchesCategory;
+
+    const matchesSearch =
+      h.name.toLowerCase().includes(query) ||
+      (h.category && h.category.toLowerCase().includes(query)) ||
+      (h.unit && h.unit.toLowerCase().includes(query)) ||
+      (h.reminderTime && h.reminderTime.toLowerCase().includes(query));
+
+    return matchesCategory && matchesSearch;
+  });
 
   const [exportedToast, setExportedToast] = useState(false);
 
@@ -274,8 +290,32 @@ export const HabitsView: React.FC<HabitsViewProps> = ({
           <span className="text-xs font-mono text-zinc-400">Week of {days[0].dateStr} - {days[6].dateStr}</span>
         </div>
 
-        {/* Category Filter Pills */}
-        <div className="px-4 sm:px-5 py-2.5 border-b border-zinc-800/80 bg-zinc-950/40 flex flex-wrap items-center justify-between gap-2.5">
+        {/* Category Filter Pills and Search */}
+        <div className="px-4 sm:px-5 py-3 border-b border-zinc-800/80 bg-zinc-950/40 flex flex-col md:flex-row md:items-center justify-between gap-3">
+          {/* Real-time Search Input */}
+          <div className="relative w-full md:w-72">
+            <Search className="w-3.5 h-3.5 text-zinc-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search habits..."
+              className="w-full pl-8 pr-7 py-1.5 rounded-lg bg-zinc-900 border border-zinc-700/80 text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500/40 transition-all"
+            />
+            {searchQuery && (
+              <button
+                type="button"
+                onClick={() => setSearchQuery('')}
+                className="absolute right-2 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-zinc-300 p-0.5 rounded transition-colors"
+                title="Clear search"
+                aria-label="Clear search"
+              >
+                <X className="w-3.5 h-3.5" />
+              </button>
+            )}
+          </div>
+
+          {/* Category Filter Pills */}
           <div className="flex flex-wrap items-center gap-1.5">
             <span className="text-xs text-zinc-400 font-medium flex items-center gap-1 mr-1">
               <Filter className="w-3.5 h-3.5 text-zinc-500" />
@@ -310,6 +350,7 @@ export const HabitsView: React.FC<HabitsViewProps> = ({
 
           <div className="text-xs font-mono text-zinc-400">
             Showing {filteredHabits.length} of {habits.length} habits
+            {searchQuery && <span className="text-indigo-400 ml-1">matching "{searchQuery}"</span>}
           </div>
         </div>
 
@@ -333,15 +374,39 @@ export const HabitsView: React.FC<HabitsViewProps> = ({
               {filteredHabits.length === 0 ? (
                 <tr>
                   <td colSpan={5 + days.length} className="py-12 px-4 text-center">
-                    <Filter className="w-8 h-8 text-zinc-600 mx-auto mb-2" />
-                    <div className="text-sm font-semibold text-zinc-300">No habits found in category "{selectedCategory}"</div>
-                    <p className="text-xs text-zinc-500 mt-1">Switch to "All" or create a new habit tagged under {selectedCategory}.</p>
-                    <button
-                      onClick={() => setSelectedCategory('All')}
-                      className="mt-3 px-3.5 py-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-xs text-zinc-200 font-medium border border-zinc-700 transition-colors"
-                    >
-                      Show All Habits
-                    </button>
+                    {searchQuery ? (
+                      <Search className="w-8 h-8 text-zinc-600 mx-auto mb-2" />
+                    ) : (
+                      <Filter className="w-8 h-8 text-zinc-600 mx-auto mb-2" />
+                    )}
+                    <div className="text-sm font-semibold text-zinc-300">
+                      {searchQuery
+                        ? `No habits matching "${searchQuery}"`
+                        : `No habits found in category "${selectedCategory}"`}
+                    </div>
+                    <p className="text-xs text-zinc-500 mt-1 max-w-sm mx-auto">
+                      {searchQuery
+                        ? 'Try checking for spelling or searching by category, reminder time, or unit.'
+                        : `Switch to "All" or create a new habit tagged under ${selectedCategory}.`}
+                    </p>
+                    <div className="flex items-center justify-center gap-2 mt-3.5">
+                      {searchQuery && (
+                        <button
+                          onClick={() => setSearchQuery('')}
+                          className="px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-xs text-white font-medium transition-colors"
+                        >
+                          Clear Search
+                        </button>
+                      )}
+                      {selectedCategory !== 'All' && (
+                        <button
+                          onClick={() => setSelectedCategory('All')}
+                          className="px-3.5 py-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-xs text-zinc-200 font-medium border border-zinc-700 transition-colors"
+                        >
+                          Show All Categories
+                        </button>
+                      )}
+                    </div>
                   </td>
                 </tr>
               ) : (
